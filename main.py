@@ -15,13 +15,30 @@ user_agent = u_agnt = {
 
 SAVE_FOLDER = 'img_downloaded'
 
+# Size
+# &tbs=isz:l
+# &tbs=isz:m
+# &tbs=isz:i
 
-def get_img_links(data, num_images):
+
+def get_img_links(data, num_images, size=None):
+
+    # Search url of image
     search_url = google_img + 'q=' + data
 
+    # Define the size of image
+    if size == 'large':
+        search_url += '&tbs=isz:l'
+    elif size == 'medium':
+        search_url += '&tbs=isz:m'
+    elif size == 'icon':
+        search_url += '&tbs=isz:i'
+
+    # get all the HTML
     response = requests.get(search_url, headers=user_agent)
     html = response.text
 
+    # Parse the HTML & get all the images with class 'rg_i Q4LuWd'
     b_soup = BeautifulSoup(html, 'html.parser')
     results = b_soup.findAll('img', {'class': 'rg_i Q4LuWd'})
 
@@ -40,10 +57,11 @@ def get_img_links(data, num_images):
 
 
 def download_imgs(data, img_links):
-
     for i, link in enumerate(img_links):
         response = requests.get(link)
         img_name = SAVE_FOLDER + '/' + data + '-' + str(i) + '.jpg'
+
+        # Save the img
         with open(img_name, 'wb') as file:
             file.write(response.content)
 
@@ -56,7 +74,7 @@ def main():
     if not os.path.exists(SAVE_FOLDER):
         os.mkdir(SAVE_FOLDER)
 
-    link_list = get_img_links(data, num_images)
+    link_list = get_img_links(data, num_images, 'large')
     download_imgs(data, link_list)
 
 
